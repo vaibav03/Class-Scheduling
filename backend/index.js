@@ -1,22 +1,32 @@
 import express from "express";
-import dotnev from "dotenv";
+import dotenv from "dotenv";
 import cors from "cors";
-import { mongoconnect } from "./db/mongodb";
-import { generateotp , verifyotp } from "./routes/auth";
+import { mongoconnect } from "./db/mongodb.js";
+import cookieParser from "cookie-parser";
+import { sendOTP, verifyOTP } from "./controllers/otpController.js"
+import { verifyToken } from "./middleware/authmiddleware.js";
+
 const app = express();
 mongoconnect();
-app.listen(3000, () => {
-  console.log("server is running on port 3000");
+app.listen(5000, () => {
+  console.log("server is running on port 5000");
 });
+
 const router = express.Router();
 dotenv.config();
 app.use(cors())
 app.use(express.json());
+app.use(cookieParser());
+app.use((req, res, next) => {
+  console.log("Middleware running")
+  next();
+})
+app.use(router)
+router.post("/generateotp", sendOTP);
+router.post("/verifyotp", verifyOTP);
 
-router.get("/generateotp",generateotp);
-router.post("/verifyotp",verifyotp);
-
-router.post("/login",login)
+// router.use(verifyToken);
+// router.post("/login",login)
 
 
-router.get("/admin",getAdmin); 
+// router.get("/admin",getAdmin); 
