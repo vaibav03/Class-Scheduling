@@ -5,6 +5,7 @@ import { mongoconnect } from "./db/mongodb.js";
 import cookieParser from "cookie-parser";
 import { sendOTP, verifyOTP } from "./controllers/otpController.js"
 import { verifyToken } from "./middleware/authmiddleware.js";
+import { refresh, login } from "./routes/auth.js";
 
 const app = express();
 mongoconnect();
@@ -22,11 +23,13 @@ app.use((req, res, next) => {
   next();
 })
 app.use(router)
+
 router.post("/generateotp", sendOTP);
 router.post("/verifyotp", verifyOTP);
+router.get("/refresh",verifyToken,refresh);
 
-// router.use(verifyToken);
-// router.post("/login",login)
+
+ router.get("/login",login)
 
 
 // router.get("/admin",getAdmin); 

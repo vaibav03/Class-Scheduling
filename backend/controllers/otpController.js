@@ -2,6 +2,7 @@ import randomstring from "randomstring";
 import { sendEmail } from "./nodemailer.js";
 import { user } from "../models/users.js";
 import { otpStore } from "../models/otpSchema.js";
+import bcrypt from "bcrypt"
 
 function generateOTP() {
   return randomstring.generate({
@@ -16,6 +17,9 @@ export async function sendOTP(req, res) {
     const { email } = req.body;
     const otp = generateOTP();
     await sendEmail(email, otp);
+    const doesUserExist = await otpStore.findOne({email});
+    if(doesUserExist) await doesUserExist.deleteOne();
+    
     const newOTP = new otpStore({ email, otp });
     newOTP.save();
     return res.status(200).json({ message: 'OTP sent successfully' });
@@ -27,12 +31,13 @@ export async function sendOTP(req, res) {
 
 export async function verifyOTP(req, res) {
   try {
-    console.log("Veerify OTP RUNNIGN")
+    console.log("Verify OTP running")
     const { email, otp, password, role } = req.body;
     const otpUser = await otpStore.findOne({ email, otp });
     if (!otpUser) return res.status(400).json({ message: 'Invalid OTP' });
     
-    const newUser = new user({ email, password, role });
+    const hashedPassword =  bcrypt.hashSync(password, 10);
+    const newUser = new user({ email, password : hashedPassword, role });
     newUser.save()
 
     return res.json({ message: 'OTP verified successfully' });
