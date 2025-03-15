@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import { sendOTP, verifyOTP } from "./controllers/otpController.js"
 import { verifyToken } from "./middleware/authmiddleware.js";
 import { refresh, login } from "./routes/auth.js";
+import { getUsers, writeGroups } from "./routes/admin.js";
 
 const app = express();
 mongoconnect();
@@ -29,7 +30,8 @@ router.post("/verifyotp", verifyOTP);
 router.get("/refresh",verifyToken,refresh);
 
 
- router.get("/login",login)
+router.get("/login",login)
 
+router.get("/admin",getUsers); 
 
-// router.get("/admin",getAdmin); 
+router.post("/writeGroups",writeGroups);
