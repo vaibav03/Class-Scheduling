@@ -4,6 +4,7 @@ import { X } from "lucide-react"
 export interface DroppableProps {
   _id: string;
   email: string;
+  role : string;
 }
 
 function Droppable({ _id, email }: DroppableProps) {

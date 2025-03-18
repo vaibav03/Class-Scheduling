@@ -15,17 +15,23 @@ export function generateRefreshToken(email) {
 }
 
 export async function login(req, res) {
+
   console.log("logging in");
-  const { email, password } = req.body;
-  const newUser = await user.findOne({ email });
+  try {
+  const { email, password , role } = req.body;
+  const newUser = await user.findOne({ email , role });
+  console.log(newUser,password,newUser.password)
   if (!newUser) return res.status(400).json({ message: 'User not found' });
   const passwordmatch = await bcrypt.compare(password, newUser.password);
   if (!passwordmatch) return res.status(400).json({ message: 'Invalid password' });
   const accessToken = jwt.sign({email}, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
-  console.log(accessToken)
   const refreshToken = jwt.sign({email}, process.env.REFRESH_TOKEN_SECRET);
   res.cookie('refreshToken', refreshToken, { httpOnly: true, expiresIn: 2 * 24 * 60 * 60 * 1000 });
   res.json({ accessToken: accessToken, role: newUser.role });
+}catch(e) {
+  console.log(e)
+  res.status(500).json({error : "Internal server error"})
+}
 }
 
 export async function refresh() {

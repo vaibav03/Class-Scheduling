@@ -30,15 +30,18 @@ export default function Home() {
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState("student");
   const router = useRouter();
-
-  async function handleLogin() {
+  
+  async function handleLogin(event: React.FormEvent) {
+    event.preventDefault()
     try {
       const response = await axiosInstance.post("/login", {
         email,
         password,
         role,
       });
-      userStoreState.getState().login(email, response.data.access_token,null);
+      
+      userStoreState.getState().login(email, response.data.accessToken,null,response.data.role);
+      console.log(userStoreState.getState().email , userStoreState.getState().accessToken , userStoreState.getState().refreshToken)
       toast.success("Login successful"); 
       router.push(`/${response.data.role}`);    
     } catch (error) {
@@ -50,7 +53,7 @@ export default function Home() {
   return (
     <div className="flex flex-col justify-center items-center bg-[#FAF3E0] h-screen w-full">
       <h1 className={`absolute text-[#B8860B] top-5 left-5 text-5xl ${dancingScript.className}`}>
-        EdTech
+        Class Scheduling
       </h1>
       <div className="absolute left-50vh top-1/2 transform -translate-y-1/2 rounded-3xl w-full md:w-[500px] bg-[#FCFCFC] shadow-lg">
         <h1 className={`text-2xl ${montserrat.className} font text-center pt-4 pb-4`}>

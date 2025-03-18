@@ -6,23 +6,34 @@ import { DndContext, useDraggable, useDroppable, DragEndEvent } from '@dnd-kit/c
 import UserDraggable from "../components/draggable"
 import MultipleDroppables, { DroppableProps } from "../components/droppable";
 import { toast } from "react-hot-toast"
+import userStoreState from "../store/userStore";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
-  const [users, setUsers] = useState<DroppableProps[]>([
-    { _id: "t1", email: "teacher1@example.com" },
-    { _id: "t2", email: "teacher2@example.com" },
-    { _id: "s1", email: "student1@example.com" },
-    { _id: "s2", email: "student2@example.com" },]);
-  const [teachers, setTeachers] = useState<DroppableProps[]>([
-    { _id: "t1", email: "teacher1@example.com" },
-    { _id: "t2", email: "teacher2@example.com" },
-  ]);
-  const [students, setStudents] = useState<DroppableProps[]>([
-    { _id: "s1", email: "student1@example.com" },
-    { _id: "s2", email: "student2@example.com" },
-  ]);
+  const router = useRouter();
+  const [users, setUsers] = useState<DroppableProps[]>([]);
+  const [teachers, setTeachers] = useState<DroppableProps[]>([]);
+  const [students, setStudents] = useState<DroppableProps[]>([]);
   const [group, setGroup] = useState<DroppableProps[]>([]);
   const [groups, setGroups] = useState([])
+  useEffect(()=>{
+    const role = userStoreState.getState().role;
+    if(role!=="admin") router.push("/");
+
+    async function getUsers_Groups(){
+      const response = await axiosInstance.get("/admin");
+      console.log(response)
+      setUsers(response.data.users);
+      setGroups(response.data.groups);
+      const newStudents = users.filter((user) => user.role === "student")
+      setStudents(newStudents)
+
+      const newTeachers = users.filter((user) => user.role === "teacher")
+    }
+
+    getUsers_Groups();
+
+  },[])
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over) return;
@@ -34,13 +45,11 @@ export default function Page() {
     const user  = users.find((user) => user._id === id );
     if(user)
     setGroup((prev) => [...prev,user])
-
+    
 
     console.log(group)
   }
-  useEffect(() => {
-    console.log(group)
-  }, [group])
+
   // useEffect(() => {
 
   //   async function getUsers() {

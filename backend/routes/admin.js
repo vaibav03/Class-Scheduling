@@ -4,8 +4,8 @@ import { user } from '../models/users.js';
 export async function getUsers(req, res){
   try {
     const users = await user.find();
-    const groups = await groups.find()
-    return res.status(200).json({users, groups});
+    const groupss = await groups.find()
+    return res.status(200).json({users, groups : groupss});
   } catch(e) {
     console.error(e);
     res.status(500).json({message: "Server Error"});
