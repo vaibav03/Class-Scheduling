@@ -6,24 +6,12 @@ export const axiosInstance = axios.create({
   withCredentials: true,
 });
 
-axiosInstance.interceptors.request.use(
-  (config) =>{
-    const {accessToken} = userStoreState.getState();
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    }
-    return config
-  },
-  (error) => Promise.reject(error)
-)
-
 
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error)=>{
-    if(error.response.status === 401 && error.response.message==="Invalid Access Token"){
-      const accessToken = await axiosInstance.get("/refresh");
-      userStoreState.getState().refreshTokenSuccess(accessToken.data.access_token);
+    if(error.response.status === 401 && error.response.message==="Access Token expired"){
+      const res  = axiosInstance.get("/refresh") 
     }
   }
 )
