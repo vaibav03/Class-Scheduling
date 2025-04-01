@@ -18,7 +18,7 @@ const router = express.Router();
 dotenv.config();
 const corsOptions ={
   origin:'http://localhost:3000', 
-  credentials:true,            //access-control-allow-credentials:true
+  credentials:true,            
   optionSuccessStatus:200
 }
 
@@ -33,11 +33,11 @@ app.use(router)
 
 router.post("/generateotp", sendOTP);
 router.post("/verifyotp", verifyOTP);
-router.get("/refresh",verifyToken,refresh);
-
-
+router.get("/refresh",refresh);
 router.post("/login",login)
 
-router.get("/admin",verifyToken,getUsers); 
 
+router.get("/admin",verifyToken,getUsers); 
 router.post("/writeGroups",verifyToken,writeGroups);
+
+// router.get("/student",getClasses)

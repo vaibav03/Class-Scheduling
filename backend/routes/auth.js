@@ -15,19 +15,19 @@ export function generateRefreshToken(email) {
 }
 
 export async function login(req, res) {
-
   console.log("logging in");
+
   try {
   const { email, password , role } = req.body;
   const newUser = await user.findOne({ email , role });
-  console.log(newUser,password,newUser.password)
   if (!newUser) return res.status(400).json({ message: 'User not found' });
   const passwordmatch = await bcrypt.compare(password, newUser.password);
   if (!passwordmatch) return res.status(400).json({ message: 'Invalid password' });
   const accessToken = jwt.sign({email}, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
   const refreshToken = jwt.sign({email}, process.env.REFRESH_TOKEN_SECRET);
   res.cookie('refreshToken', refreshToken, { httpOnly: true, expiresIn: 2 * 24 * 60 * 60 * 1000 });
-  res.json({ accessToken: accessToken, role: newUser.role });
+  res.cookie('accessToken',accessToken,{httpOnly:true, expiresIn: 1 * 60 * 60 * 1000})
+  res.json({ role: newUser.role });
 }catch(e) {
   console.log(e)
   res.status(500).json({error : "Internal server error"})
@@ -36,17 +36,27 @@ export async function login(req, res) {
 
 export async function refresh() {
   const refreshToken = req.cookies.refreshToken;
-  if (!refreshToken) return res.status(401).json({ message: 'Unauthorized' });
+  if (!refreshToken) return res.status(401).json({ message: 'Refresh Token not found' });
 
   try {
-    const email = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-    if (!email) return res.status(403).json({ message: 'Forbidden' })
-    const newUser = await user.findOne({ email });
-    if (!newUser) return res.status(400).json({ message: "User not found" });
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err,email)=>{
+      if (err) {
+        console.log(err)
+        return res.status(403).json({ message: 'Forbidden' });
+      }
+      
+      const doesUserExist = user.findOne({email});
+      if(!doesUserExist) res.status(400).json({ message: "User not found" });
+
+      const accessToken = jwt.sign({email},process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+      return res.status(200).json({accessToken})
+    });
+
 
     const accessToken = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
-    res.json({ accessToken: accessToken });
+    res.cookie("accessToken", accessToken, { httpOnly: true, expiresIn: 1 * 60 * 60 * 1000 });
+    res.json({ message : " Refreshed" });
   } catch (e) {
-    return res.status(403).json({ message: 'Forbidden' });
+    return res.status(403).json({ message: 'Cannot refresh access token' });
   }
 }

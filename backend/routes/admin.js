@@ -1,26 +1,36 @@
 import groups from '../models/groups.js';
 import { user } from '../models/users.js';
 
-export async function getUsers(req, res){
+export async function getUsers(req, res) {
   try {
-    const users = await user.find();
+    let users = await user.find();
+    
+    users = users.map((user) => {
+      return {
+        email: user.email,
+        role: user.role,
+        _id : user.id
+      };
+    });
+    
     const groupss = await groups.find()
-    return res.status(200).json({users, groups : groupss});
-  } catch(e) {
+    return res.status(200).json({ users, groups: groupss });
+  } catch (e) {
     console.error(e);
-    res.status(500).json({message: "Server Error"});
+    res.status(500).json({ message: "Server Error" });
   }
 }
 
 
-export async function writeGroups(req,res){
-  try{
-    const { group } = req.body; 
+export async function writeGroups(req, res) {
+  try {
+    const  group  = req.body;
     const newGroup = new groups(group);
     await newGroup.save();
-    res.status(201).json(newGroup);
-  }catch(e){
+    console.log(req.body)
+    return res.status(201).json(newGroup);
+  } catch (e) {
     console.error(e);
-    res.status(500).json({message: "Server Error"});
+    res.status(500).json({ message: "Server Error" });
   }
 }
