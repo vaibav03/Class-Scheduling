@@ -6,3 +6,6 @@ const groupSchema  = new mongoose.Schema({
   classTimings : [{day : String, startTime : String, endTime : String}],
   subject : String
 })
+
+const groups = mongoose.model('groups', groupSchema);
+export default groups;

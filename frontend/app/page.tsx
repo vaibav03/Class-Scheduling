@@ -9,9 +9,11 @@ import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import { Dancing_Script, Montserrat } from "next/font/google";
 import axios from "axios"
-import dotenv from "dotenv"
+import toast from "react-hot-toast";
+import { Provider } from "react-redux";
+import  userStoreState  from "./store/userStore"
+import { axiosInstance } from "./axiosInstance";
 
-dotenv.config()
 const dancingScript = Dancing_Script({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
@@ -27,12 +29,31 @@ export default function Home() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState("student");
-
   const router = useRouter();
+  
+  async function handleLogin(event: React.FormEvent) {
+    event.preventDefault()
+    try {
+      const response = await axiosInstance.post("/login", {
+        email,
+        password,
+        role,
+      });
+      
+      userStoreState.getState().login(email, response.data.accessToken,null,response.data.role);
+      console.log(userStoreState.getState().email , userStoreState.getState().accessToken , userStoreState.getState().refreshToken)
+      toast.success("Login successful"); 
+      router.push(`/${response.data.role}`);    
+    } catch (error) {
+      console.log(error);
+      toast.error("Login failed");
+    }
+  }
+
   return (
     <div className="flex flex-col justify-center items-center bg-[#FAF3E0] h-screen w-full">
       <h1 className={`absolute text-[#B8860B] top-5 left-5 text-5xl ${dancingScript.className}`}>
-        EdTech
+        Class Scheduling
       </h1>
       <div className="absolute left-50vh top-1/2 transform -translate-y-1/2 rounded-3xl w-full md:w-[500px] bg-[#FCFCFC] shadow-lg">
         <h1 className={`text-2xl ${montserrat.className} font text-center pt-4 pb-4`}>
@@ -41,7 +62,7 @@ export default function Home() {
         <hr />
         <form
           className="flex flex-col gap-4 p-8"
-          // onSubmit={handleLogin}
+          onSubmit={handleLogin}
         >
           <input
             type="name"
