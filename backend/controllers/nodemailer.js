@@ -10,14 +10,30 @@ const transporter = nodemailer.createTransport({
 });
 
 export async function sendEmail(email, otp) {
-  console.log(process.env.EMAIL)
-  console.log(process.env.PASSWORD)
   transporter.sendMail({
     from: process.env.EMAIL,
     to: email,
     subject: 'OTP for password reset',
     text: `
     Your OTP is ${otp}
+  `
+  }, ((err, info) => {
+    if (err) {
+      console.log(err)
+    } else {
+      console.log(info)
+    }
+  }))
+}
+
+
+export async function sendEmailToGroup(members, groupName, classTimings) {
+  transporter.sendMail({
+    from: process.env.EMAIL,
+    to: members.join(", "),
+    subject: 'Class has been canceled',
+    text: `
+    Class has been cancelled on ${classTimings.day} from ${classTimings.startTime} to ${classTimings.endTime} for group ${groupName}
   `
   }, ((err, info) => {
     if (err) {

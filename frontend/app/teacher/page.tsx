@@ -1,17 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import { days } from "../../utils/data.js";
 import { motion } from "framer-motion";
+import { axiosInstance } from "../axiosInstance";
 
 export default function Page() {
   const [startTime, setStartTime] = useState<Dayjs | null>(null);
   const [endTime, setEndTime] = useState<Dayjs | null>(null);
   const [day, setDay] = useState<string>("");
+
+ 
 
   const handleSchedule = () => {
     if (!day || !startTime || !endTime) {
@@ -32,6 +35,25 @@ export default function Page() {
     alert("Class scheduled successfully!");
   };
 
+  async function createClassSchedule(){
+    // Function to create class schedule
+    const classSchedule = {
+      day: day,
+      startTime: startTime?.format("HH:mm"),
+      endTime: endTime?.format("HH:mm"),
+    };
+
+    const response  = await axiosInstance.post("/createSchedule", classSchedule);
+    if(response.status == 200){
+      console.log("Class Schedule Created:", classSchedule);
+    // Here you can send the classSchedule to your backend or perform any other action
+    alert("Class scheduled successfully!");
+    }else{
+      alert("NOt created")
+    }
+
+    
+  }
   return (
     <div className="min-h-screen flex items-center justify-around bg-amber-100 ">
       <div className="flex flex-col shadow-2xl bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 max-w-lg w-full font-semibold ">

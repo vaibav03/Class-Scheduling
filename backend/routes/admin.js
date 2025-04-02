@@ -4,15 +4,15 @@ import { user } from '../models/users.js';
 export async function getUsers(req, res) {
   try {
     let users = await user.find();
-    
+
     users = users.map((user) => {
       return {
         email: user.email,
         role: user.role,
-        _id : user.id
+        _id: user.id
       };
     });
-    
+
     const groupss = await groups.find()
     return res.status(200).json({ users, groups: groupss });
   } catch (e) {
@@ -24,7 +24,7 @@ export async function getUsers(req, res) {
 
 export async function writeGroups(req, res) {
   try {
-    const  group  = req.body;
+    const group = req.body;
     const newGroup = new groups(group);
     await newGroup.save();
     console.log(req.body)
@@ -34,3 +34,17 @@ export async function writeGroups(req, res) {
     res.status(500).json({ message: "Server Error" });
   }
 }
+
+export async function deleteGroups(req, res) {
+  try {
+    console.log("deleteing group")
+    const { group } = req.body
+    await groups.deleteOne(group);
+    console.log("success");
+    return res.status(200).json({ message: "Group deleted" });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: "Server Error" });
+  }
+}
+
